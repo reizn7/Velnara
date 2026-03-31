@@ -127,19 +127,32 @@ export default function LoginPage() {
         </div>
 
         {/* Right side - Login Form */}
-        <div className="flex-1 flex items-center justify-center p-8 relative">
-          {/* Mobile mesh gradient */}
-          <div className="lg:hidden absolute top-[-10%] right-[-5%] w-[300px] h-[300px] rounded-full bg-purple-200/50 blur-3xl" />
-          <div className="lg:hidden absolute bottom-[-10%] left-[-5%] w-[300px] h-[300px] rounded-full bg-violet-200/50 blur-3xl" />
+        <div className="flex-1 flex items-center justify-center p-8 relative bg-gradient-to-br from-purple-50 via-white to-violet-50 lg:bg-none lg:bg-white">
+          {/* Mobile decorative elements */}
+          <div className="lg:hidden absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-purple-600 to-purple-500 rounded-b-[3rem]" />
+          <div className="lg:hidden absolute top-24 left-4 right-4 h-20 bg-gradient-to-r from-purple-400/20 to-violet-400/20 rounded-2xl blur-2xl" />
 
           <div className="w-full max-w-md relative z-10">
             {/* Mobile logo */}
-            <div className="lg:hidden text-center mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-600 rounded-2xl mb-4 shadow-lg shadow-purple-200">
-                <Pill className="w-8 h-8 text-white" />
+            <div className="lg:hidden text-center mb-8 pt-4">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl mb-4 shadow-xl shadow-purple-300/30 border border-purple-100">
+                <Pill className="w-10 h-10 text-purple-600" />
               </div>
               <h1 className="text-2xl font-bold text-gray-900">Velnara</h1>
-              <p className="text-gray-500 mt-1">Your Local Medicine Marketplace</p>
+              <p className="text-gray-500 mt-1 text-sm">Your Local Medicine Marketplace</p>
+              
+              {/* Mobile feature pills */}
+              <div className="flex flex-wrap justify-center gap-2 mt-4">
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
+                  <MapPin className="w-3 h-3" /> Local Shops
+                </span>
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                  <Truck className="w-3 h-3" /> Fast Delivery
+                </span>
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                  <Shield className="w-3 h-3" /> Verified
+                </span>
+              </div>
             </div>
 
             {/* Desktop welcome */}
