@@ -18,7 +18,7 @@ export default async function handler(req, res) {
 
   // POST - add new medicine or update existing
   if (req.method === "POST") {
-    const { id, name, category, description, variants } = req.body;
+    const { id, name, category } = req.body;
 
     if (!name) return res.status(400).json({ error: "Medicine name is required" });
 
@@ -27,8 +27,6 @@ export default async function handler(req, res) {
         name,
         nameLower: name.toLowerCase(),
         category: category || "",
-        description: description || "",
-        variants: variants || [], // [{ name, mg, price, manufacturer }]
         updatedAt: new Date().toISOString(),
       };
 

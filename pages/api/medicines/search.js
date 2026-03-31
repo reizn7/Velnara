@@ -28,8 +28,6 @@ export default async function handler(req, res) {
         id: doc.id,
         name: data.name,
         category: data.category || "",
-        description: data.description || "",
-        variantCount: data.variants?.length || 0,
       };
     });
 

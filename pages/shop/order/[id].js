@@ -99,7 +99,6 @@ export default function ShopOrderDetailPage() {
                 <tr>
                   <th className="px-5 py-2 text-left text-xs font-medium text-gray-500 uppercase">Medicine</th>
                   <th className="px-5 py-2 text-center text-xs font-medium text-gray-500 uppercase">Qty</th>
-                  <th className="px-5 py-2 text-right text-xs font-medium text-gray-500 uppercase">Price</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -107,12 +106,28 @@ export default function ShopOrderDetailPage() {
                   <tr key={idx}>
                     <td className="px-5 py-3">
                       <p className="text-sm font-medium text-gray-900">{item.medicineName}</p>
-                      <p className="text-xs text-gray-500">{item.variantName} - {item.variantMg}</p>
+                      <div className="flex flex-wrap gap-1 mt-0.5">
+                        {item.company && (
+                          <span className="px-1.5 py-0.5 bg-blue-50 text-blue-700 text-xs rounded">
+                            {item.company}
+                          </span>
+                        )}
+                        {item.dosage && (
+                          <span className="px-1.5 py-0.5 bg-purple-50 text-purple-700 text-xs rounded">
+                            {item.dosage}
+                          </span>
+                        )}
+                        {item.form && (
+                          <span className="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">
+                            {item.form}
+                          </span>
+                        )}
+                      </div>
+                      {item.userNotes && (
+                        <p className="text-xs text-purple-600 mt-1 italic">Note: {item.userNotes}</p>
+                      )}
                     </td>
                     <td className="px-5 py-3 text-center text-sm text-gray-700">{item.quantity}</td>
-                    <td className="px-5 py-3 text-right text-sm font-medium text-gray-900">
-                      Rs. {item.variantPrice * item.quantity}
-                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -120,19 +135,7 @@ export default function ShopOrderDetailPage() {
           </div>
         )}
 
-        {/* Prescription */}
-        {order.prescriptionUrl && (
-          <div className="px-5 py-3 border-b border-gray-200">
-            <p className="text-xs font-medium text-gray-500 uppercase mb-2">Prescription</p>
-            <a href={order.prescriptionUrl} target="_blank" rel="noopener noreferrer">
-              <img src={order.prescriptionUrl} alt="Prescription" className="w-40 h-auto rounded-lg border border-gray-200" />
-            </a>
-          </div>
-        )}
-
         <div className="p-5 space-y-1">
-          <p className="text-sm text-gray-500">Total: <strong className="text-purple-700">Rs. {order.totalAmount}</strong></p>
-          <p className="text-sm text-gray-500">Commission: <strong className="text-red-600">Rs. {order.commission}</strong></p>
           <p className="text-sm text-gray-500">Payment: <strong>COD</strong></p>
         </div>
       </div>

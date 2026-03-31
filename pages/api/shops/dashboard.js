@@ -31,7 +31,6 @@ export default async function handler(req, res) {
             id: doc.id,
             items: data.items || [],
             itemCount: data.itemCount || 0,
-            prescriptionUrl: data.prescriptionUrl || null,
             estimatedTotal: data.estimatedTotal || 0,
             createdAt: data.createdAt,
           });

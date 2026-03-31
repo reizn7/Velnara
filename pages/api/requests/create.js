@@ -8,11 +8,11 @@ export default async function handler(req, res) {
   const user = await verifySession(req);
   if (!user || user.role !== "user") return res.status(403).json({ error: "Not authorized" });
 
-  const { type, items, prescriptionUrl, notes, userLat, userLng } = req.body;
+  const { items, notes, userLat, userLng } = req.body;
 
-  // Validate: must have cart items OR prescription
-  if ((!items || items.length === 0) && !prescriptionUrl) {
-    return res.status(400).json({ error: "Add medicines to cart or upload a prescription" });
+  // Validate: must have cart items
+  if (!items || items.length === 0) {
+    return res.status(400).json({ error: "Add medicines to your cart first" });
   }
 
   // Validate: must have user location
@@ -32,7 +32,7 @@ export default async function handler(req, res) {
     const nearbyShops = [];
     shopsSnap.docs.forEach((doc) => {
       const shop = doc.data();
-      if (!shop.lat || !shop.lng) return; // Skip shops without location
+      if (!shop.lat || !shop.lng) return;
 
       const distance = haversineDistance(userLat, userLng, shop.lat, shop.lng);
       if (distance <= radiusKm) {
@@ -42,28 +42,23 @@ export default async function handler(req, res) {
 
     if (nearbyShops.length === 0) {
       return res.status(400).json({
-        error: `No active shops found within ${radiusKm}km of your location. Try again later or check your location.`,
+        error: `No active shops found within ${radiusKm}km of your location.`,
       });
     }
 
     const shopIds = nearbyShops.map((s) => s.id);
 
-    // Build items array with indices for per-item accept/reject
-    const requestItems = (items || []).map((item, index) => ({
+    // Build items array
+    const requestItems = items.map((item, index) => ({
       index,
       medicineId: item.medicineId,
       medicineName: item.medicineName,
-      variantName: item.variantName || "",
-      variantMg: item.variantMg || "",
-      variantPrice: item.variantPrice || 0,
-      manufacturer: item.manufacturer || "",
+      company: item.company || "",
+      dosage: item.dosage || "",
+      form: item.form || "",
+      userNotes: item.userNotes || "",
       quantity: item.quantity || 1,
     }));
-
-    // Calculate estimated total
-    const estimatedTotal = requestItems.reduce(
-      (sum, item) => sum + item.variantPrice * item.quantity, 0
-    );
 
     // Initialize shop responses with distance
     const shopResponses = {};
@@ -76,12 +71,10 @@ export default async function handler(req, res) {
       userId: user.uid,
       userEmail: user.email,
       userName: user.name || user.email,
-      type: type || "cart",
+      type: "cart",
       items: requestItems,
       itemCount: requestItems.length,
-      prescriptionUrl: prescriptionUrl || null,
       notes: notes || null,
-      estimatedTotal,
       status: "pending",
       targetShopIds: shopIds,
       shopResponses,

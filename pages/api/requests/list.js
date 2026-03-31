@@ -48,11 +48,27 @@ export default async function handler(req, res) {
           status = "accepted";
         }
 
+        // Fetch delivery info if order exists
+        let deliveryInfo = null;
+        if (data.orderId) {
+          const orderDoc = await adminDb.collection("orders").doc(data.orderId).get();
+          if (orderDoc.exists) {
+            const orderData = orderDoc.data();
+            if (orderData.hasDeliveryPartner) {
+              deliveryInfo = {
+                hasDeliveryPartner: true,
+                deliveryPartnerPhone: orderData.deliveryPartnerPhone || "",
+              };
+            }
+          }
+        }
+
         requests.push({
           id: doc.id,
           ...data,
           status,
           acceptedShops,
+          deliveryInfo,
         });
       }
     } else if (role === "shop" && user.role === "shop") {
@@ -81,7 +97,6 @@ export default async function handler(req, res) {
           type: data.type || "cart",
           items: data.items || [],
           itemCount: data.itemCount || 0,
-          prescriptionUrl: data.prescriptionUrl || null,
           notes: data.notes || null,
           estimatedTotal: data.estimatedTotal || 0,
           userName: data.userName,

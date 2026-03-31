@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import AdminLayout from "@/components/layouts/AdminLayout";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
 import { toast } from "sonner";
-import { Store, Plus, MapPin } from "lucide-react";
+import { Store, Plus, MapPin, Truck, Phone } from "lucide-react";
 
 export default function AdminShopsPage() {
   const [shops, setShops] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
-  const [newShop, setNewShop] = useState({ name: "", address: "", ownerEmail: "", lat: 0, lng: 0, phone: "" });
+  const [newShop, setNewShop] = useState({ name: "", address: "", ownerEmail: "", lat: 0, lng: 0, phone: "", hasDeliveryPartner: false, deliveryPartnerPhone: "" });
   const [adding, setAdding] = useState(false);
 
   const fetchShops = async () => {
@@ -40,7 +40,7 @@ export default function AdminShopsPage() {
       });
       if (res.ok) {
         toast.success("Shop registered");
-        setNewShop({ name: "", address: "", ownerEmail: "", lat: 0, lng: 0, phone: "" });
+        setNewShop({ name: "", address: "", ownerEmail: "", lat: 0, lng: 0, phone: "", hasDeliveryPartner: false, deliveryPartnerPhone: "" });
         setShowAdd(false);
         fetchShops();
       } else {
@@ -104,6 +104,39 @@ export default function AdminShopsPage() {
             </div>
             <input type="text" placeholder="Phone" value={newShop.phone} onChange={(e) => setNewShop({ ...newShop, phone: e.target.value })} className="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-purple-500" />
           </div>
+
+          {/* Delivery Partner Toggle */}
+          <div className="border border-gray-200 rounded-lg p-4">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  checked={newShop.hasDeliveryPartner}
+                  onChange={(e) => setNewShop({ ...newShop, hasDeliveryPartner: e.target.checked, deliveryPartnerPhone: e.target.checked ? newShop.deliveryPartnerPhone : "" })}
+                  className="sr-only peer"
+                />
+                <div className="w-9 h-5 bg-gray-300 rounded-full peer-checked:bg-purple-600 transition-colors" />
+                <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow peer-checked:translate-x-4 transition-transform" />
+              </div>
+              <div className="flex items-center gap-2">
+                <Truck className="w-4 h-4 text-gray-500" />
+                <span className="text-sm font-medium text-gray-700">Has Delivery Partner</span>
+              </div>
+            </label>
+            {newShop.hasDeliveryPartner && (
+              <div className="mt-3 ml-12">
+                <input
+                  type="tel"
+                  placeholder="Delivery partner phone number"
+                  value={newShop.deliveryPartnerPhone}
+                  onChange={(e) => setNewShop({ ...newShop, deliveryPartnerPhone: e.target.value })}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-purple-500"
+                />
+              </div>
+            )}
+          </div>
+
           <button type="submit" disabled={adding} className="px-4 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 disabled:opacity-50">
             {adding ? "Registering..." : "Register"}
           </button>
@@ -129,6 +162,12 @@ export default function AdminShopsPage() {
                 )}
                 <p className="text-xs text-gray-400 mt-1">Owner: {shop.ownerEmail}</p>
                 <p className="text-xs text-gray-400">Phone: {shop.phone || "-"}</p>
+                {shop.hasDeliveryPartner && (
+                  <p className="text-xs text-gray-400 flex items-center gap-1">
+                    <Truck className="w-3 h-3 text-purple-500" />
+                    Delivery: {shop.deliveryPartnerPhone}
+                  </p>
+                )}
                 <div className="flex items-center gap-3 mt-2">
                   <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${shop.isActive ? "bg-purple-100 text-purple-700" : "bg-red-100 text-red-700"}`}>
                     {shop.isActive ? "Active" : "Inactive"}

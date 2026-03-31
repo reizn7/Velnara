@@ -57,11 +57,12 @@ export default async function handler(req, res) {
       // Multi-item order data
       items: acceptedItems,
       itemCount: acceptedItems.length,
-      prescriptionUrl: requestData.prescriptionUrl || null,
       notes: requestData.notes || null,
       totalAmount,
       commission,
       paymentMethod: "cod",
+      hasDeliveryPartner: !!shopData.hasDeliveryPartner,
+      deliveryPartnerPhone: shopData.hasDeliveryPartner ? (shopData.deliveryPartnerPhone || "") : "",
       status: "confirmed",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

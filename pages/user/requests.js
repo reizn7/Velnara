@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import UserLayout from "@/components/layouts/UserLayout";
 import { toast } from "sonner";
-import { Clock, CheckCircle, Store, Image as ImageIcon, ChevronDown, ChevronUp, MapPin } from "lucide-react";
+import { Clock, CheckCircle, Store, ChevronDown, ChevronUp, MapPin, Truck, Phone } from "lucide-react";
 
 export default function UserRequestsPage() {
   const [requests, setRequests] = useState([]);
@@ -76,16 +76,8 @@ export default function UserRequestsPage() {
                   <div className="flex items-start justify-between mb-2">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        {req.prescriptionUrl && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
-                            <ImageIcon className="w-3 h-3" />
-                            Prescription
-                          </span>
-                        )}
                         <span className="text-xs text-gray-400">
-                          {req.itemCount > 0
-                            ? `${req.itemCount} item${req.itemCount > 1 ? "s" : ""}`
-                            : "Prescription only"}
+                          {req.itemCount} item{req.itemCount !== 1 ? "s" : ""}
                         </span>
                       </div>
 
@@ -94,12 +86,6 @@ export default function UserRequestsPage() {
                         <p className="text-sm font-medium text-gray-900">
                           {req.items.slice(0, 3).map((item) => item.medicineName).join(", ")}
                           {req.items.length > 3 && ` +${req.items.length - 3} more`}
-                        </p>
-                      )}
-
-                      {req.estimatedTotal > 0 && (
-                        <p className="text-sm text-purple-700 font-semibold mt-0.5">
-                          Estimated: Rs. {req.estimatedTotal}
                         </p>
                       )}
                     </div>
@@ -144,7 +130,6 @@ export default function UserRequestsPage() {
                           <tr className="bg-gray-50 border-b border-gray-100">
                             <th className="text-left py-2 px-3 text-xs font-medium text-gray-500">Medicine</th>
                             <th className="text-center py-2 px-2 text-xs font-medium text-gray-500">Qty</th>
-                            <th className="text-right py-2 px-3 text-xs font-medium text-gray-500">Price</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -152,14 +137,28 @@ export default function UserRequestsPage() {
                             <tr key={idx}>
                               <td className="py-2 px-3">
                                 <p className="font-medium text-gray-900">{item.medicineName}</p>
-                                <p className="text-xs text-gray-500">
-                                  {item.variantName} - {item.variantMg}
-                                </p>
+                                <div className="flex flex-wrap gap-1 mt-0.5">
+                                  {item.company && (
+                                    <span className="px-1.5 py-0.5 bg-blue-50 text-blue-700 text-xs rounded">
+                                      {item.company}
+                                    </span>
+                                  )}
+                                  {item.dosage && (
+                                    <span className="px-1.5 py-0.5 bg-purple-50 text-purple-700 text-xs rounded">
+                                      {item.dosage}
+                                    </span>
+                                  )}
+                                  {item.form && (
+                                    <span className="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">
+                                      {item.form}
+                                    </span>
+                                  )}
+                                </div>
+                                {item.userNotes && (
+                                  <p className="text-xs text-purple-600 mt-1 italic">Note: {item.userNotes}</p>
+                                )}
                               </td>
                               <td className="py-2 px-2 text-center text-gray-700">{item.quantity}</td>
-                              <td className="py-2 px-3 text-right font-medium text-gray-900">
-                                Rs. {item.variantPrice * item.quantity}
-                              </td>
                             </tr>
                           ))}
                         </tbody>
@@ -217,13 +216,33 @@ export default function UserRequestsPage() {
                   )}
 
                   {req.status === "selected" && req.orderId && (
-                    <div className="mt-3 p-3 bg-purple-50 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-purple-600" />
-                        <span className="text-sm text-purple-700">
-                          Order placed with {req.selectedShopName}
-                        </span>
+                    <div className="mt-3 space-y-2">
+                      <div className="p-3 bg-purple-50 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-purple-600" />
+                          <span className="text-sm text-purple-700">
+                            Order placed with {req.selectedShopName}
+                          </span>
+                        </div>
                       </div>
+                      {req.deliveryInfo?.hasDeliveryPartner && req.deliveryInfo.deliveryPartnerPhone && (
+                        <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <Truck className="w-4 h-4 text-green-600" />
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">Delivery Partner</p>
+                              <p className="text-xs text-gray-600">{req.deliveryInfo.deliveryPartnerPhone}</p>
+                            </div>
+                          </div>
+                          <a
+                            href={`tel:${req.deliveryInfo.deliveryPartnerPhone}`}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 transition-colors"
+                          >
+                            <Phone className="w-3 h-3" />
+                            Call
+                          </a>
+                        </div>
+                      )}
                     </div>
                   )}
 

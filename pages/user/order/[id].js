@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import UserLayout from "@/components/layouts/UserLayout";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle, Clock, Truck, Package, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, Clock, Truck, Package, XCircle, Phone } from "lucide-react";
 import { ORDER_STATUS_LABELS } from "@/constants";
 
 const TRACKING_STEPS = [
@@ -100,16 +100,6 @@ export default function OrderTrackingPage() {
           </div>
         )}
 
-        {/* Prescription */}
-        {order.prescriptionUrl && (
-          <div className="px-5 py-3 border-b border-gray-200">
-            <p className="text-xs font-medium text-gray-500 uppercase mb-2">Prescription</p>
-            <a href={order.prescriptionUrl} target="_blank" rel="noopener noreferrer">
-              <img src={order.prescriptionUrl} alt="Prescription" className="w-40 h-auto rounded-lg border border-gray-200" />
-            </a>
-          </div>
-        )}
-
         {/* Order info */}
         <table className="w-full">
           <tbody className="divide-y divide-gray-100">
@@ -132,6 +122,30 @@ export default function OrderTrackingPage() {
           </tbody>
         </table>
       </div>
+
+      {/* Delivery Partner */}
+      {order.hasDeliveryPartner && order.deliveryPartnerPhone && (
+        <div className="bg-purple-50 border border-purple-200 rounded-xl p-5 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                <Truck className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Delivery Partner</p>
+                <p className="text-sm text-gray-600">{order.deliveryPartnerPhone}</p>
+              </div>
+            </div>
+            <a
+              href={`tel:${order.deliveryPartnerPhone}`}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              <Phone className="w-4 h-4" />
+              Call
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Tracking table */}
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">

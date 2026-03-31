@@ -128,12 +128,11 @@ export default function ShopDashboard() {
                   <p className="font-medium text-gray-900">
                     {req.items?.length > 0
                       ? req.items.slice(0, 2).map((i) => i.medicineName).join(", ")
-                      : "Prescription Request"}
+                      : "Request"}
                     {req.items?.length > 2 && ` +${req.items.length - 2} more`}
                   </p>
                   <p className="text-sm text-gray-500">
                     {req.itemCount || 0} item{(req.itemCount || 0) !== 1 ? "s" : ""}
-                    {req.prescriptionUrl ? " + prescription" : ""}
                     {req.estimatedTotal > 0 ? ` | Rs. ${req.estimatedTotal}` : ""}
                   </p>
                 </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import ShopLayout from "@/components/layouts/ShopLayout";
 import { toast } from "sonner";
-import { CheckCircle, XCircle, Clock, Image as ImageIcon, FileText, ChevronDown, ChevronUp } from "lucide-react";
+import { CheckCircle, XCircle, Clock, ChevronDown, ChevronUp } from "lucide-react";
 
 export default function ShopRequestsPage() {
   const [requests, setRequests] = useState([]);
@@ -120,12 +120,6 @@ export default function ShopRequestsPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        {req.prescriptionUrl && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
-                            <ImageIcon className="w-3 h-3" />
-                            Prescription
-                          </span>
-                        )}
                         <span className="text-xs text-gray-400">
                           {req.itemCount} item{req.itemCount !== 1 ? "s" : ""}
                         </span>
@@ -136,18 +130,10 @@ export default function ShopRequestsPage() {
                         {req.items?.slice(0, 2).map((item) => item.medicineName).join(", ")}
                         {req.items?.length > 2 && ` +${req.items.length - 2} more`}
                       </p>
-                      {req.items?.length === 0 && req.prescriptionUrl && (
-                        <p className="text-sm font-medium text-gray-900">Prescription-only request</p>
-                      )}
 
                       <p className="text-xs text-gray-400 mt-1">
                         Customer: {req.userName} | {new Date(req.createdAt).toLocaleString()}
                       </p>
-                      {req.estimatedTotal > 0 && (
-                        <p className="text-sm text-purple-700 font-semibold mt-1">
-                          Estimated: Rs. {req.estimatedTotal}
-                        </p>
-                      )}
                     </div>
 
                     {req.shopStatus === "pending" ? (
@@ -195,7 +181,7 @@ export default function ShopRequestsPage() {
                   </div>
 
                   {/* Expand toggle */}
-                  {(req.items?.length > 0 || req.prescriptionUrl || req.notes) && (
+                  {(req.items?.length > 0 || req.notes) && (
                     <button
                       onClick={() => setExpandedRequest(isExpanded ? null : req.id)}
                       className="flex items-center gap-1 text-xs text-purple-600 hover:text-purple-700 mt-2"
@@ -209,20 +195,6 @@ export default function ShopRequestsPage() {
                 {/* Expanded details */}
                 {isExpanded && (
                   <div className="border-t border-gray-100 px-5 pb-5 pt-3">
-                    {/* Prescription Image */}
-                    {req.prescriptionUrl && (
-                      <div className="mb-4">
-                        <p className="text-xs font-medium text-gray-500 uppercase mb-2">Prescription</p>
-                        <a href={req.prescriptionUrl} target="_blank" rel="noopener noreferrer">
-                          <img
-                            src={req.prescriptionUrl}
-                            alt="Prescription"
-                            className="w-64 h-auto rounded-lg border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
-                          />
-                        </a>
-                      </div>
-                    )}
-
                     {/* Notes */}
                     {req.notes && (
                       <div className="mb-4 p-3 bg-gray-50 rounded-lg">
@@ -253,7 +225,6 @@ export default function ShopRequestsPage() {
                               )}
                               <th className="text-left py-2 text-xs font-medium text-gray-500">Medicine</th>
                               <th className="text-center py-2 text-xs font-medium text-gray-500">Qty</th>
-                              <th className="text-right py-2 text-xs font-medium text-gray-500">Price</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-50">
@@ -275,15 +246,28 @@ export default function ShopRequestsPage() {
                                   )}
                                   <td className="py-2">
                                     <p className="font-medium text-gray-900">{item.medicineName}</p>
-                                    <p className="text-xs text-gray-500">
-                                      {item.variantName} - {item.variantMg}
-                                      {item.manufacturer && ` | ${item.manufacturer}`}
-                                    </p>
+                                    <div className="flex flex-wrap gap-1 mt-0.5">
+                                      {item.company && (
+                                        <span className="px-1.5 py-0.5 bg-blue-50 text-blue-700 text-xs rounded">
+                                          {item.company}
+                                        </span>
+                                      )}
+                                      {item.dosage && (
+                                        <span className="px-1.5 py-0.5 bg-purple-50 text-purple-700 text-xs rounded">
+                                          {item.dosage}
+                                        </span>
+                                      )}
+                                      {item.form && (
+                                        <span className="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">
+                                          {item.form}
+                                        </span>
+                                      )}
+                                    </div>
+                                    {item.userNotes && (
+                                      <p className="text-xs text-purple-600 mt-1 italic">Note: {item.userNotes}</p>
+                                    )}
                                   </td>
                                   <td className="py-2 text-center text-gray-700">{item.quantity}</td>
-                                  <td className="py-2 text-right font-medium text-gray-900">
-                                    Rs. {item.variantPrice * item.quantity}
-                                  </td>
                                 </tr>
                               );
                             })}

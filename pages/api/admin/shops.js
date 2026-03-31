@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "POST") {
-    const { name, address, ownerEmail, lat, lng, phone } = req.body;
+    const { name, address, ownerEmail, lat, lng, phone, hasDeliveryPartner, deliveryPartnerPhone } = req.body;
     if (!name || !address || !ownerEmail) {
       return res.status(400).json({ error: "Name, address, and owner email required" });
     }
@@ -30,6 +30,8 @@ export default async function handler(req, res) {
         lat: lat || 0,
         lng: lng || 0,
         phone: phone || "",
+        hasDeliveryPartner: !!hasDeliveryPartner,
+        deliveryPartnerPhone: hasDeliveryPartner ? (deliveryPartnerPhone || "") : "",
         isActive: true,
         walletBalance: 0,
         createdAt: new Date().toISOString(),
