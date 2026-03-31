@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import UserLayout from "@/components/layouts/UserLayout";
 import { toast } from "sonner";
-import { Clock, CheckCircle, Store, ChevronDown, ChevronUp, MapPin, Truck, Phone } from "lucide-react";
+import { Clock, CheckCircle, Store, ChevronDown, ChevronUp, MapPin, Truck, Phone, ShoppingBag } from "lucide-react";
 
 export default function UserRequestsPage() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedRequest, setExpandedRequest] = useState(null);
+  const [selectingShop, setSelectingShop] = useState(null); // {requestId, shopId, hasDelivery}
 
   const fetchRequests = async () => {
     try {
@@ -26,15 +27,16 @@ export default function UserRequestsPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleSelectShop = async (requestId, shopId) => {
+  const handleSelectShop = async (requestId, shopId, deliveryMethod = "cod") => {
     try {
       const res = await fetch("/api/requests/select-shop", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ requestId, shopId }),
+        body: JSON.stringify({ requestId, shopId, deliveryMethod }),
       });
       if (res.ok) {
-        toast.success("Shop selected! Order created.");
+        toast.success(deliveryMethod === "pickup" ? "Order placed for pickup!" : "Order placed for delivery!");
+        setSelectingShop(null);
         fetchRequests();
       } else {
         const data = await res.json();
@@ -42,6 +44,16 @@ export default function UserRequestsPage() {
       }
     } catch (err) {
       toast.error("Failed to select shop");
+    }
+  };
+
+  const initiateSelectShop = (requestId, shop) => {
+    if (shop.hasDeliveryPartner) {
+      // Shop has delivery - show option to choose
+      setSelectingShop({ requestId, shopId: shop.shopId, shopName: shop.shopName, hasDelivery: true });
+    } else {
+      // No delivery - pickup only
+      handleSelectShop(requestId, shop.shopId, "pickup");
     }
   };
 
@@ -184,7 +196,7 @@ export default function UserRequestsPage() {
                               <p className="text-xs text-gray-500">
                                 {shop.address}
                               </p>
-                              <div className="flex items-center gap-2 mt-0.5">
+                              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                                 {shop.distance && (
                                   <span className="inline-flex items-center gap-0.5 text-xs text-purple-600">
                                     <MapPin className="w-3 h-3" />
@@ -193,7 +205,18 @@ export default function UserRequestsPage() {
                                 )}
                                 {shop.acceptedCount > 0 && req.itemCount > 0 && (
                                   <span className="text-xs text-gray-500">
-                                    {shop.acceptedCount}/{req.itemCount} items available
+                                    {shop.acceptedCount}/{req.itemCount} items
+                                  </span>
+                                )}
+                                {shop.hasDeliveryPartner ? (
+                                  <span className="inline-flex items-center gap-0.5 text-xs text-green-600 bg-green-50 px-1.5 py-0.5 rounded">
+                                    <Truck className="w-3 h-3" />
+                                    Delivery
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-0.5 text-xs text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded">
+                                    <ShoppingBag className="w-3 h-3" />
+                                    Pickup only
                                   </span>
                                 )}
                               </div>
@@ -204,7 +227,7 @@ export default function UserRequestsPage() {
                               Rs. {shop.totalPrice}
                             </span>
                             <button
-                              onClick={() => handleSelectShop(req.id, shop.shopId)}
+                              onClick={() => initiateSelectShop(req.id, shop)}
                               className="px-3 py-1.5 bg-purple-600 text-white text-xs font-medium rounded-lg hover:bg-purple-700 transition-colors"
                             >
                               Select
@@ -253,6 +276,50 @@ export default function UserRequestsPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Delivery Method Selection Modal */}
+      {selectingShop && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Choose Delivery Option</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              How would you like to receive your order from {selectingShop.shopName}?
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={() => handleSelectShop(selectingShop.requestId, selectingShop.shopId, "cod")}
+                className="w-full flex items-center gap-3 p-4 border-2 border-purple-200 rounded-xl hover:border-purple-500 hover:bg-purple-50 transition-colors"
+              >
+                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <Truck className="w-5 h-5 text-purple-600" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium text-gray-900">Home Delivery (COD)</p>
+                  <p className="text-xs text-gray-500">Pay when you receive</p>
+                </div>
+              </button>
+              <button
+                onClick={() => handleSelectShop(selectingShop.requestId, selectingShop.shopId, "pickup")}
+                className="w-full flex items-center gap-3 p-4 border-2 border-gray-200 rounded-xl hover:border-purple-500 hover:bg-purple-50 transition-colors"
+              >
+                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <ShoppingBag className="w-5 h-5 text-gray-600" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium text-gray-900">Self Pickup</p>
+                  <p className="text-xs text-gray-500">Collect from shop</p>
+                </div>
+              </button>
+            </div>
+            <button
+              onClick={() => setSelectingShop(null)}
+              className="w-full mt-4 py-2 text-sm text-gray-500 hover:text-gray-700"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       )}
     </UserLayout>

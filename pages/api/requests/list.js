@@ -29,6 +29,7 @@ export default async function handler(req, res) {
             if (response.status === "accepted") {
               const shopDoc = await adminDb.collection("shops").doc(shopId).get();
               const shopData = shopDoc.exists ? shopDoc.data() : {};
+              const hasDeliveryPartner = !!shopData.deliveryPartnerPhone;
               acceptedShops.push({
                 shopId,
                 shopName: shopData.name || "Unknown",
@@ -37,6 +38,8 @@ export default async function handler(req, res) {
                 acceptedItemIndices: response.acceptedItemIndices || [],
                 acceptedCount: (response.acceptedItemIndices || []).length,
                 distance: response.distance || null,
+                hasDeliveryPartner,
+                deliveryPartnerPhone: hasDeliveryPartner ? shopData.deliveryPartnerPhone : null,
               });
             }
           }

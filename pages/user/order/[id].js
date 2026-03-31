@@ -112,8 +112,10 @@ export default function OrderTrackingPage() {
               <td className="px-5 py-3 text-sm font-semibold text-purple-700">Rs. {order.totalAmount}</td>
             </tr>
             <tr>
-              <td className="px-5 py-3 text-sm text-gray-500">Payment</td>
-              <td className="px-5 py-3 text-sm text-gray-900">Cash on Delivery</td>
+              <td className="px-5 py-3 text-sm text-gray-500">Delivery</td>
+              <td className="px-5 py-3 text-sm text-gray-900">
+                {order.deliveryMethod === "pickup" ? "Self Pickup" : "Home Delivery (COD)"}
+              </td>
             </tr>
             <tr>
               <td className="px-5 py-3 text-sm text-gray-500">Ordered On</td>
@@ -124,7 +126,7 @@ export default function OrderTrackingPage() {
       </div>
 
       {/* Delivery Partner */}
-      {order.hasDeliveryPartner && order.deliveryPartnerPhone && (
+      {order.deliveryMethod !== "pickup" && order.hasDeliveryPartner && order.deliveryPartnerPhone && (
         <div className="bg-purple-50 border border-purple-200 rounded-xl p-5 mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

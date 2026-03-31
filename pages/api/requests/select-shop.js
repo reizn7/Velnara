@@ -1,7 +1,7 @@
 import { db as adminDb } from "@/lib/firebaseadmin";
 import { verifySession } from "@/lib/verifySession";
 
-const COMMISSION_RATE = Number(process.env.COMMISSION_RATE || 5);
+const COMMISSION_RATE = Number(process.env.COMMISSION_RATE || 10);
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   const user = await verifySession(req);
   if (!user || user.role !== "user") return res.status(403).json({ error: "Not authorized" });
 
-  const { requestId, shopId } = req.body;
+  const { requestId, shopId, deliveryMethod } = req.body;
   if (!requestId || !shopId) return res.status(400).json({ error: "Missing required fields" });
 
   try {
@@ -46,6 +46,10 @@ export default async function handler(req, res) {
     const totalAmount = shopResponse.totalPrice || requestData.estimatedTotal || 0;
     const commission = Math.round(totalAmount * COMMISSION_RATE / 100);
 
+    // Determine delivery method - COD only if shop has delivery partner
+    const hasDelivery = !!shopData.deliveryPartnerPhone;
+    const finalDeliveryMethod = hasDelivery ? (deliveryMethod || "cod") : "pickup";
+
     // Create order with all accepted items
     const orderRef = await adminDb.collection("orders").add({
       requestId,
@@ -60,9 +64,9 @@ export default async function handler(req, res) {
       notes: requestData.notes || null,
       totalAmount,
       commission,
-      paymentMethod: "cod",
-      hasDeliveryPartner: !!shopData.hasDeliveryPartner,
-      deliveryPartnerPhone: shopData.hasDeliveryPartner ? (shopData.deliveryPartnerPhone || "") : "",
+      deliveryMethod: finalDeliveryMethod,
+      hasDeliveryPartner: hasDelivery,
+      deliveryPartnerPhone: hasDelivery ? (shopData.deliveryPartnerPhone || "") : "",
       status: "confirmed",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

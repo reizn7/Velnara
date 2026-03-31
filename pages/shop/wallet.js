@@ -40,9 +40,9 @@ export default function ShopWalletPage() {
       <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 flex items-start gap-3">
         <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 shrink-0" />
         <div>
-          <p className="text-sm font-medium text-yellow-800">Commission on COD orders</p>
+          <p className="text-sm font-medium text-yellow-800">10% Commission on all orders</p>
           <p className="text-xs text-yellow-700 mt-0.5">
-            For COD orders, commission accumulates in your pending balance. Please pay periodically to keep your account active.
+            Commission (10%) is calculated on each order. Please pay periodically to keep your account active.
           </p>
         </div>
       </div>

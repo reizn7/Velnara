@@ -135,8 +135,15 @@ export default function ShopOrderDetailPage() {
           </div>
         )}
 
-        <div className="p-5 space-y-1">
-          <p className="text-sm text-gray-500">Payment: <strong>COD</strong></p>
+        <div className="p-5 space-y-2">
+          <p className="text-sm text-gray-500">
+            Delivery: <strong>{order.deliveryMethod === "pickup" ? "Self Pickup" : "Home Delivery (COD)"}</strong>
+          </p>
+          {order.commission > 0 && (
+            <p className="text-sm text-gray-500">
+              Commission (10%): <strong className="text-red-600">Rs. {order.commission}</strong>
+            </p>
+          )}
         </div>
       </div>
 
@@ -145,13 +152,22 @@ export default function ShopOrderDetailPage() {
         <div className="bg-white border border-gray-200 rounded-xl p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Update Status</h2>
           <div className="flex flex-wrap gap-3">
-            {nextStatus && (
+            {nextStatus && (order.deliveryMethod !== "pickup" || nextStatus !== "on_way") && (
               <button
                 onClick={() => handleUpdateStatus(nextStatus)}
                 disabled={updating}
                 className="px-5 py-2.5 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-colors"
               >
                 {updating ? "Updating..." : `Mark as ${ORDER_STATUS_LABELS[nextStatus]}`}
+              </button>
+            )}
+            {order.deliveryMethod === "pickup" && order.status === "preparing" && (
+              <button
+                onClick={() => handleUpdateStatus("delivered")}
+                disabled={updating}
+                className="px-5 py-2.5 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+              >
+                {updating ? "Updating..." : "Mark as Picked Up"}
               </button>
             )}
             <button
