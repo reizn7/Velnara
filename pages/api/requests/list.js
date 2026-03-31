@@ -36,6 +36,7 @@ export default async function handler(req, res) {
                 totalPrice: response.totalPrice || data.estimatedTotal,
                 acceptedItemIndices: response.acceptedItemIndices || [],
                 acceptedCount: (response.acceptedItemIndices || []).length,
+                distance: response.distance || null,
               });
             }
           }

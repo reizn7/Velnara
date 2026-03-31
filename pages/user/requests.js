@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import UserLayout from "@/components/layouts/UserLayout";
 import { toast } from "sonner";
-import { Clock, CheckCircle, Store, Image as ImageIcon, ChevronDown, ChevronUp } from "lucide-react";
+import { Clock, CheckCircle, Store, Image as ImageIcon, ChevronDown, ChevronUp, MapPin } from "lucide-react";
 
 export default function UserRequestsPage() {
   const [requests, setRequests] = useState([]);
@@ -184,12 +184,20 @@ export default function UserRequestsPage() {
                               <p className="text-sm font-medium text-gray-900">{shop.shopName}</p>
                               <p className="text-xs text-gray-500">
                                 {shop.address}
-                                {shop.acceptedCount > 0 && req.itemCount > 0 && (
-                                  <span className="ml-2 text-purple-600">
-                                    ({shop.acceptedCount}/{req.itemCount} items available)
+                              </p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                {shop.distance && (
+                                  <span className="inline-flex items-center gap-0.5 text-xs text-purple-600">
+                                    <MapPin className="w-3 h-3" />
+                                    {shop.distance} km away
                                   </span>
                                 )}
-                              </p>
+                                {shop.acceptedCount > 0 && req.itemCount > 0 && (
+                                  <span className="text-xs text-gray-500">
+                                    {shop.acceptedCount}/{req.itemCount} items available
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-3">

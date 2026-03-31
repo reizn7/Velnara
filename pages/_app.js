@@ -2,6 +2,7 @@ import Head from "next/head";
 import "../styles/globals.css";
 import { AuthProvider } from "../contexts/AuthContext";
 import { CartProvider } from "../contexts/CartContext";
+import { LocationProvider } from "../contexts/LocationContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 
@@ -29,10 +30,12 @@ function MyApp({ Component, pageProps }) {
       `}</style>
       <QueryClientProvider client={queryClient}>
         <AuthProvider queryClient={queryClient}>
-          <CartProvider>
-            <Component {...pageProps} />
-            <Toaster richColors position="top-right" />
-          </CartProvider>
+          <LocationProvider>
+            <CartProvider>
+              <Component {...pageProps} />
+              <Toaster richColors position="top-right" />
+            </CartProvider>
+          </LocationProvider>
         </AuthProvider>
       </QueryClientProvider>
     </>

@@ -2,14 +2,16 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/router";
 import UserLayout from "@/components/layouts/UserLayout";
 import { useCart } from "@/contexts/CartContext";
+import { useLocation } from "@/contexts/LocationContext";
 import { storage } from "@/lib/firebaseClient";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { Trash2, Plus, Minus, ShoppingCart, Camera, Upload, X, Image as ImageIcon } from "lucide-react";
+import { Trash2, Plus, Minus, ShoppingCart, Camera, Upload, X, Image as ImageIcon, MapPin, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function CartPage() {
   const router = useRouter();
   const { items, removeItem, updateQuantity, clearCart, totalItems, totalPrice } = useCart();
+  const { location, loading: locationLoading, error: locationError, requestLocation, hasLocation } = useLocation();
   const [submitting, setSubmitting] = useState(false);
   const [prescriptionUrl, setPrescriptionUrl] = useState(null);
   const [prescriptionPreview, setPrescriptionPreview] = useState(null);
@@ -66,6 +68,12 @@ export default function CartPage() {
       return;
     }
 
+    if (!hasLocation) {
+      toast.error("Please enable location to find nearby shops");
+      requestLocation();
+      return;
+    }
+
     setSubmitting(true);
     try {
       const res = await fetch("/api/requests/create", {
@@ -84,6 +92,8 @@ export default function CartPage() {
           })),
           prescriptionUrl: prescriptionUrl || null,
           notes: notes.trim() || null,
+          userLat: location.lat,
+          userLng: location.lng,
         }),
       });
 
@@ -261,6 +271,44 @@ export default function CartPage() {
             rows={2}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20 outline-none resize-none"
           />
+        </div>
+
+        {/* Location Banner */}
+        <div className={`border rounded-xl p-4 mb-6 ${hasLocation ? "bg-purple-50 border-purple-200" : locationError ? "bg-red-50 border-red-200" : "bg-gray-50 border-gray-200"}`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MapPin className={`w-4 h-4 ${hasLocation ? "text-purple-600" : "text-gray-500"}`} />
+              <div>
+                <p className="text-sm font-medium text-gray-900">
+                  {hasLocation ? "Location enabled" : "Location required"}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {hasLocation
+                    ? `Shops within 5km will receive your request`
+                    : locationError || "Enable location to find nearby shops"}
+                </p>
+              </div>
+            </div>
+            {!hasLocation && (
+              <button
+                onClick={requestLocation}
+                disabled={locationLoading}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 text-white text-xs font-medium rounded-lg hover:bg-purple-700 disabled:opacity-50"
+              >
+                {locationLoading ? (
+                  <>
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Detecting...
+                  </>
+                ) : (
+                  <>
+                    <MapPin className="w-3 h-3" />
+                    Enable Location
+                  </>
+                )}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Summary + Submit */}
