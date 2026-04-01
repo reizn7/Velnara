@@ -1,6 +1,8 @@
 import { db as adminDb } from "@/lib/firebaseadmin";
+import { getMessaging } from "firebase-admin/messaging";
 import { verifySession } from "@/lib/verifySession";
 import { haversineDistance } from "@/lib/geo";
+import { FieldValue } from "firebase-admin/firestore";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
@@ -88,6 +90,11 @@ export default async function handler(req, res) {
       updatedAt: new Date().toISOString(),
     });
 
+    // Send push notifications to nearby shops (fire-and-forget, don't block response)
+    sendPushToShops(shopIds, requestItems, user.name || user.email).catch((err) => {
+      console.error("Push notification error (non-fatal):", err);
+    });
+
     return res.status(200).json({
       success: true,
       requestId: requestRef.id,
@@ -96,5 +103,74 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error("Create request error:", error);
     return res.status(500).json({ error: "Failed to create request" });
+  }
+}
+
+/**
+ * Send FCM push notifications to all nearby shops.
+ * Collects tokens from shop docs, sends individually, cleans up stale tokens.
+ */
+async function sendPushToShops(shopIds, items, customerName) {
+  // Collect all FCM tokens from nearby shops
+  const allTokens = []; // { token, shopId }
+  for (const shopId of shopIds) {
+    const shopDoc = await adminDb.collection("shops").doc(shopId).get();
+    const tokens = shopDoc.data()?.fcmTokens || [];
+    for (const token of tokens) {
+      allTokens.push({ token, shopId });
+    }
+  }
+
+  if (allTokens.length === 0) return;
+
+  const itemSummary = items.slice(0, 3).map((i) => i.medicineName).join(", ")
+    + (items.length > 3 ? ` +${items.length - 3} more` : "");
+
+  const messaging = getMessaging();
+
+  // Send to each token
+  const results = await Promise.allSettled(
+    allTokens.map(({ token }) =>
+      messaging.send({
+        token,
+        notification: {
+          title: "New Medicine Request!",
+          body: `${customerName} needs: ${itemSummary}`,
+        },
+        data: {
+          url: "/shop/requests",
+          type: "new_request",
+        },
+        webpush: {
+          fcmOptions: {
+            link: "/shop/requests",
+          },
+        },
+      })
+    )
+  );
+
+  // Clean up stale tokens
+  const staleTokensByShop = {};
+  results.forEach((result, i) => {
+    if (result.status === "rejected") {
+      const errorCode = result.reason?.code;
+      if (
+        errorCode === "messaging/registration-token-not-registered" ||
+        errorCode === "messaging/invalid-registration-token"
+      ) {
+        const { token, shopId } = allTokens[i];
+        if (!staleTokensByShop[shopId]) staleTokensByShop[shopId] = [];
+        staleTokensByShop[shopId].push(token);
+      }
+    }
+  });
+
+  // Remove stale tokens from Firestore
+  for (const [shopId, tokens] of Object.entries(staleTokensByShop)) {
+    await adminDb.collection("shops").doc(shopId).update({
+      fcmTokens: FieldValue.arrayRemove(...tokens),
+    });
+    console.log(`Cleaned ${tokens.length} stale FCM tokens from shop ${shopId}`);
   }
 }

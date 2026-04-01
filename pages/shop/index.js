@@ -1,15 +1,17 @@
 import { useState, useEffect, useRef } from "react";
 import ShopLayout from "@/components/layouts/ShopLayout";
 import { toast } from "sonner";
-import { Bell, Package, Wallet, ClipboardList, Volume2 } from "lucide-react";
+import { Bell, Package, Wallet, ClipboardList, Volume2, BellRing } from "lucide-react";
 import Link from "next/link";
+import { requestNotificationPermission, onForegroundMessage } from "@/lib/fcm";
 
 export default function ShopDashboard() {
   const [stats, setStats] = useState({ pendingRequests: 0, activeOrders: 0, walletBalance: 0 });
   const [recentRequests, setRecentRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [notifStatus, setNotifStatus] = useState("unknown"); // unknown | granted | denied | unsupported
   const prevCountRef = useRef(0);
-  const audioRef = useRef(null);
+  const fcmRegisteredRef = useRef(false);
 
   const fetchDashboard = async () => {
     try {
@@ -18,9 +20,9 @@ export default function ShopDashboard() {
       setStats(data.stats || { pendingRequests: 0, activeOrders: 0, walletBalance: 0 });
       setRecentRequests(data.recentRequests || []);
 
-      // Play alarm if new requests came in
+      // Play alarm if new requests came in (polling fallback)
       if (data.stats?.pendingRequests > prevCountRef.current && prevCountRef.current > 0) {
-        playAlarm();
+        toast.info("New medicine request received!", { duration: 5000 });
       }
       prevCountRef.current = data.stats?.pendingRequests || 0;
     } catch (err) {
@@ -30,33 +32,69 @@ export default function ShopDashboard() {
     }
   };
 
-  const playAlarm = () => {
-    try {
-      if (!audioRef.current) {
-        audioRef.current = new Audio("data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgipus");
+  // Register FCM token on mount
+  useEffect(() => {
+    if (fcmRegisteredRef.current) return;
+    fcmRegisteredRef.current = true;
+
+    const registerFCM = async () => {
+      if (typeof window === "undefined" || !("Notification" in window)) {
+        setNotifStatus("unsupported");
+        return;
       }
-      // Use browser notification + alert sound as fallback
-      if ("Notification" in window && Notification.permission === "granted") {
-        new Notification("Sanjeevani - New Medicine Request!", {
-          body: "A customer is looking for medicine. Check your requests.",
-          icon: "/icons/notification.png",
-        });
+
+      // Check current permission state
+      if (Notification.permission === "denied") {
+        setNotifStatus("denied");
+        return;
       }
-      toast.info("New medicine request received!", { duration: 5000 });
-    } catch (e) {}
-  };
+
+      const token = await requestNotificationPermission();
+      if (token) {
+        setNotifStatus("granted");
+        // Save token to backend
+        try {
+          await fetch("/api/shops/save-fcm-token", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token }),
+          });
+          console.log("FCM token saved");
+        } catch (err) {
+          console.error("Failed to save FCM token:", err);
+        }
+      } else {
+        setNotifStatus(Notification.permission === "denied" ? "denied" : "unknown");
+      }
+    };
+
+    registerFCM();
+  }, []);
+
+  // Listen for foreground FCM messages
+  useEffect(() => {
+    let unsubscribe = () => {};
+
+    onForegroundMessage((payload) => {
+      const title = payload.notification?.title || "New Request!";
+      const body = payload.notification?.body || "Check your requests.";
+      toast.info(`${title} - ${body}`, { duration: 8000 });
+      // Refresh dashboard data immediately
+      fetchDashboard();
+    }).then((unsub) => {
+      unsubscribe = unsub;
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     fetchDashboard();
-    // Request notification permission
-    if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission();
-    }
   }, []);
 
-  // Poll every 5 seconds for new requests
+  // Poll every 15 seconds as fallback (reduced from 5s since we have push now)
   useEffect(() => {
-    const interval = setInterval(fetchDashboard, 5000);
+    const interval = setInterval(fetchDashboard, 15000);
     return () => clearInterval(interval);
   }, []);
 
@@ -73,6 +111,24 @@ export default function ShopDashboard() {
   return (
     <ShopLayout>
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Shop Dashboard</h1>
+
+      {/* Notification status banner */}
+      {notifStatus === "denied" && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+          <BellRing className="w-5 h-5 text-red-500 shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-red-800">Notifications blocked</p>
+            <p className="text-xs text-red-600">Enable notifications in your browser settings to get instant alerts for new requests.</p>
+          </div>
+        </div>
+      )}
+
+      {notifStatus === "granted" && (
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3">
+          <Bell className="w-5 h-5 text-green-600 shrink-0" />
+          <p className="text-sm text-green-800">Push notifications active &mdash; alerts work even when this tab is closed.</p>
+        </div>
+      )}
 
       {/* Stats cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
@@ -133,7 +189,6 @@ export default function ShopDashboard() {
                   </p>
                   <p className="text-sm text-gray-500">
                     {req.itemCount || 0} item{(req.itemCount || 0) !== 1 ? "s" : ""}
-                    {req.estimatedTotal > 0 ? ` | Rs. ${req.estimatedTotal}` : ""}
                   </p>
                 </div>
                 <Link
