@@ -27,7 +27,7 @@ export default function AdminLayout({ children }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
             </div>
-            <span className="font-bold text-lg text-gray-900">Velnara Admin</span>
+            <span className="font-bold text-lg text-gray-900">Sanjeevani Admin</span>
           </Link>
         </div>
 
@@ -68,7 +68,7 @@ export default function AdminLayout({ children }) {
       {/* Mobile header */}
       <header className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
         <div className="px-4 h-14 flex items-center justify-between">
-          <span className="font-bold text-lg">Velnara Admin</span>
+          <span className="font-bold text-lg">Sanjeevani Admin</span>
           <button onClick={handleSignOut} className="p-2 text-gray-500 hover:text-red-600 rounded-lg">
             <LogOut className="w-4 h-4" />
           </button>

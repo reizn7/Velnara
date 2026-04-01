@@ -37,7 +37,7 @@ export default function ShopDashboard() {
       }
       // Use browser notification + alert sound as fallback
       if ("Notification" in window && Notification.permission === "granted") {
-        new Notification("Velnara - New Medicine Request!", {
+        new Notification("Sanjeevani - New Medicine Request!", {
           body: "A customer is looking for medicine. Check your requests.",
           icon: "/icons/notification.png",
         });

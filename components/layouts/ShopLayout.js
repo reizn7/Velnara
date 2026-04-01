@@ -22,7 +22,7 @@ export default function ShopLayout({ children }) {
             <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
               <Store className="w-4 h-4 text-white" />
             </div>
-            <span className="font-bold text-lg text-gray-900">Velnara Shop</span>
+            <span className="font-bold text-lg text-gray-900">Sanjeevani Shop</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">

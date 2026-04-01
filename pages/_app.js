@@ -22,7 +22,7 @@ function MyApp({ Component, pageProps }) {
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Velnara - Local Medicine Marketplace</title>
+        <title>Sanjeevani - Local Medicine Marketplace</title>
         <meta name="description" content="Find medicines from local shops near you" />
       </Head>
       <style jsx global>{`

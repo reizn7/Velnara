@@ -48,7 +48,7 @@ export default function AddressAutocomplete({ value, onChange, placeholder = "Se
         `q=${encodeURIComponent(searchText)}&format=json&limit=5&countrycodes=in&addressdetails=1`,
         {
           headers: {
-            "User-Agent": "Velnara-MedPlatform/1.0",
+            "User-Agent": "Sanjeevnai-MedPlatform/1.0",
           },
         }
       );

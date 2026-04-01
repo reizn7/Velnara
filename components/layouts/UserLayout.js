@@ -27,7 +27,7 @@ export default function UserLayout({ children }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
             </div>
-            <span className="font-bold text-lg text-gray-900">Velnara</span>
+            <span className="font-bold text-lg text-gray-900">Sanjeevani</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">

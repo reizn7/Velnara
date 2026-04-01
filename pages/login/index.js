@@ -52,8 +52,8 @@ export default function LoginPage() {
   return (
     <>
       <Head>
-        <title>Sign In - Velnara</title>
-        <meta name="description" content="Sign in to Velnara - Your Local Medicine Marketplace" />
+        <title>Sign In - Sanjeevani</title>
+        <meta name="description" content="Sign in to Sanjeevani - Your Local Medicine Marketplace" />
       </Head>
       <div className="min-h-screen flex bg-white">
         {/* Left side - Branding & Features */}
@@ -68,7 +68,7 @@ export default function LoginPage() {
               <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
                 <Pill className="w-6 h-6 text-white" />
               </div>
-              <span className="text-2xl font-bold text-white">Velnara</span>
+              <span className="text-2xl font-bold text-white">Sanjeevani</span>
             </div>
 
             {/* Tagline */}
@@ -138,7 +138,7 @@ export default function LoginPage() {
               <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl mb-4 shadow-xl shadow-purple-300/30 border border-purple-100">
                 <Pill className="w-10 h-10 text-purple-600" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">Velnara</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Sanjeevani</h1>
               <p className="text-gray-500 mt-1 text-sm">Your Local Medicine Marketplace</p>
               
               {/* Mobile feature pills */}
@@ -158,14 +158,14 @@ export default function LoginPage() {
             {/* Desktop welcome */}
             <div className="hidden lg:block mb-8">
               <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome back</h2>
-              <p className="text-gray-500">Sign in to continue to Velnara</p>
+              <p className="text-gray-500">Sign in to continue to Sanjeevani</p>
             </div>
 
             {/* Sign In Card */}
             <div className="bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 p-8">
               <h3 className="text-lg font-semibold text-gray-900 mb-1">Sign in</h3>
               <p className="text-sm text-gray-500 mb-6">
-                Choose how you want to use Velnara
+                Choose how you want to use Sanjeevani
               </p>
 
               {error && (
