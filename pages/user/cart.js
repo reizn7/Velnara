@@ -9,7 +9,7 @@ import { toast } from "sonner";
 export default function CartPage() {
   const router = useRouter();
   const { items, removeItem, updateQuantity, clearCart, totalItems } = useCart();
-  const { location, loading: locationLoading, error: locationError, requestLocation, hasLocation } = useLocation();
+  const { location, address, setAddress, loading: locationLoading, error: locationError, requestLocation, hasLocation } = useLocation();
   const [submitting, setSubmitting] = useState(false);
   const [notes, setNotes] = useState("");
 
@@ -44,6 +44,7 @@ export default function CartPage() {
           notes: notes.trim() || null,
           userLat: location.lat,
           userLng: location.lng,
+          deliveryAddress: address.trim() || null,
         }),
       });
 
@@ -211,6 +212,24 @@ export default function CartPage() {
                 </button>
               )}
             </div>
+          </div>
+        )}
+
+        {/* Delivery Address */}
+        {items.length > 0 && hasLocation && (
+          <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6">
+            <h2 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-purple-600" />
+              Delivery Address
+            </h2>
+            <textarea
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Your delivery address (auto-detected, you can edit)..."
+              rows={2}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20 outline-none resize-none"
+            />
+            <p className="text-xs text-gray-400 mt-1">Auto-detected from your location. Edit if needed.</p>
           </div>
         )}
 

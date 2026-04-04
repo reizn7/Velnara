@@ -4,6 +4,7 @@ const LocationContext = createContext();
 
 export function LocationProvider({ children }) {
   const [location, setLocation] = useState(null); // { lat, lng }
+  const [address, setAddress] = useState(""); // reverse-geocoded address
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [permissionState, setPermissionState] = useState("prompt"); // prompt | granted | denied
@@ -36,12 +37,21 @@ export function LocationProvider({ children }) {
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        });
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        setLocation({ lat, lng });
         setLoading(false);
         setPermissionState("granted");
+
+        // Reverse geocode to get address (fire-and-forget)
+        fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`, {
+          headers: { "User-Agent": "Sanjeevani-MedPlatform/1.0" },
+        })
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.display_name) setAddress(data.display_name);
+          })
+          .catch(() => {});
       },
       (err) => {
         setError(
@@ -71,6 +81,8 @@ export function LocationProvider({ children }) {
     <LocationContext.Provider
       value={{
         location,
+        address,
+        setAddress,
         loading,
         error,
         permissionState,

@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   const user = await verifySession(req);
   if (!user || user.role !== "user") return res.status(403).json({ error: "Not authorized" });
 
-  const { items, notes, userLat, userLng } = req.body;
+  const { items, notes, userLat, userLng, deliveryAddress } = req.body;
 
   // Validate: must have cart items
   if (!items || items.length === 0) {
@@ -85,6 +85,7 @@ export default async function handler(req, res) {
       orderId: null,
       userLat,
       userLng,
+      deliveryAddress: deliveryAddress || null,
       radiusKm,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

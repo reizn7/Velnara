@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import ShopLayout from "@/components/layouts/ShopLayout";
 import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, MapPin } from "lucide-react";
 import { ORDER_STATUSES, ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from "@/constants";
 
 const STATUS_FLOW = ["confirmed", "preparing", "on_way", "delivered"];
@@ -136,6 +136,15 @@ export default function ShopOrderDetailPage() {
         )}
 
         <div className="p-5 space-y-2">
+          {order.deliveryAddress && (
+            <div className="flex items-start gap-2 p-3 bg-purple-50 border border-purple-100 rounded-lg mb-2">
+              <MapPin className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs font-medium text-purple-700 uppercase">Delivery Address</p>
+                <p className="text-sm text-gray-900 mt-0.5">{order.deliveryAddress}</p>
+              </div>
+            </div>
+          )}
           <p className="text-sm text-gray-500">
             Delivery: <strong>{order.deliveryMethod === "pickup" ? "Self Pickup" : "Home Delivery (COD)"}</strong>
           </p>
